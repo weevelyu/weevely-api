@@ -14,11 +14,11 @@ class CreateEventsTable extends Migration
             $table->collation = 'utf8mb4_general_ci';
             $table->id();
             $table->unsignedBigInteger('calendar_id');
-            $table->string('title', 16)->charset('utf8mb4')->collation('utf8mb4_general_ci');
-            $table->string('content', 255)->charset('utf8mb4')->collation('utf8mb4_general_ci');
+            $table->string('title', 16)->default('New event')->charset('utf8mb4')->collation('utf8mb4_general_ci');
+            $table->string('content', 255)->nullable()->charset('utf8mb4')->collation('utf8mb4_general_ci');
             $table->enum('category', ['Arrangement', 'Reminder', 'Task'])->default('Reminder')->charset('latin1')->collation('latin1_general_ci');
 
-            $table->dateTime("target")->nullable();
+            $table->dateTime("target");
             $table->integer("duration")->nullable();
             $table->boolean("system")->default(false);
 

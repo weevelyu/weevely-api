@@ -73,7 +73,10 @@ class CalendarController extends Controller
 
     public function showCalendars()
     {
-        return \App\Models\User::find($this->user->id)->calendars;
+        $data = \App\Models\User::find($this->user->id)->calendars;
+        foreach ($data as $value)
+            $value["events"] = Calendar::find($value->id)->events;
+        return $data;
     }
 
     public function createCalendar(Request $request)

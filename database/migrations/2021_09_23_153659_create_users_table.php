@@ -16,7 +16,7 @@ class CreateUsersTable extends Migration
             $table->string('name', 10)->unique()->charset('utf8mb4')->collation('utf8mb4_general_ci');
             $table->string('password')->charset('utf8mb4')->collation('utf8mb4_general_ci');
             $table->string('email', 64)->unique()->charset('utf8mb4')->collation('utf8mb4_general_ci');
-            $table->string('image')->default('default_weevely_H265P.jpeg');
+            $table->string('image')->default('https://d3djy7pad2souj.cloudfront.net/weevely/avatar1_weevely_H265P.png');
             $table->string('shareId', 10)->unique()->charset('utf8mb4')->collation('utf8mb4_general_ci');
             $table->enum('role', ['user', 'admin'])->default('user')->charset('latin1')->collation('latin1_general_ci');
 

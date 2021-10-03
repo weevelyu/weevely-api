@@ -31,28 +31,32 @@ class UserController extends Controller
         return User::create($request->all());
     }
 
-    public function show(mixed $id)
+    public function show(int|string $id)
     {
-        if (!User::find($id))
+        if (is_numeric($id)) {
+            if (!$user = User::find($id))
+                return response([
+                    'message' => 'User does not exist'
+                ], 404);
+
+            return $user;
+        }
+        if (!$user = User::where('name', $id)->first())
             return response([
                 'message' => 'User does not exist'
             ], 404);
 
-        return response([
-            "user" => User::find($id),
-            "calendars" => User::find($id)->calendars
-        ]);
+        return $user;
     }
 
     public function update(UpdateUserRequest $request, int $id)
     {
         if (!$data = User::find($id))
             return response([
-                'message' => 'User does not exist'
+                'message' => 'User does not exist.'
             ], 404);
-        $data->update($request->all());
 
-        return $data;
+        return $data->update($request->all());
     }
 
     public function destroy(int $id)
@@ -65,22 +69,37 @@ class UserController extends Controller
         return User::destroy($id);
     }
 
+    public function updateMe(UpdateUserRequest $request)
+    {
+        if (!$data = User::find($this->user->id))
+            return response([
+                'message' => 'User does not exist.'
+            ], 404);
+
+        $data->update($request->all());
+        return response([
+            "message" => "Successfully updated.",
+            "user" => $data
+        ]);
+    }
+
     public function uploadAvatar(UploadAvatarRequest $request)
     {
         if ($request->file('image')) {
-            $user = User::find(JWTAuth::user(JWTAuth::getToken())->id);
+            $user = User::find($this->user->id);
+            $uimage = substr($user->image, 46);
 
-            if (\Illuminate\Support\Facades\Storage::disk('s3')->exists('weevely/' . $user->image) && !str_contains($user->image, 'weevely_H265P'))
-                \Illuminate\Support\Facades\Storage::disk('s3')->delete('weevely/' . $user->image);
+            if (\Illuminate\Support\Facades\Storage::disk('s3')->exists('weevely/' . $uimage) && !str_contains($uimage, 'weevely_H265P'))
+                \Illuminate\Support\Facades\Storage::disk('s3')->delete('weevely/' . $uimage);
 
             $user->update([
-                'image' => $image = explode('/', $request->file('image')->storeAs('avatars', $user->id . $request->file('image')->getClientOriginalName(), 's3'))[1]
+                'image' => $image = "https://d3djy7pad2souj.cloudfront.net/weevely/" . explode('/', $request->file('image')->storeAs('weevely', $user->id . $request->file('image')->getClientOriginalName(), 's3'))[1]
             ]);
 
             return response([
-                "message" => "Your avatar was uploaded",
+                "message" => "Your avatar was uploaded.",
                 "image" => $image
-            ]);
+            ], 201);
         }
     }
 }

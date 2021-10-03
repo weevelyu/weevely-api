@@ -21,19 +21,23 @@ Route::prefix('auth')->group(function () {
  * User control module
  */
 Route::prefix('users')->middleware('auth')->group(function () {
-    Route::post('/avatar', 'App\Http\Controllers\UserController@uploadAvatar');
+    Route::patch('/me', 'App\Http\Controllers\UserController@updateMe');
+    Route::post('/me/avatar', 'App\Http\Controllers\UserController@uploadAvatar');
 });
 Route::apiResource('users', 'App\Http\Controllers\UserController');
 
 
 /**
- * Calendar control module
+ * Calendar and event control module
  */
 Route::prefix('calendars')->middleware('auth')->group(function () {
     Route::get('/my', 'App\Http\Controllers\CalendarController@showCalendars');
     Route::post('/my', 'App\Http\Controllers\CalendarController@createCalendar');
-    Route::post('/{id}/events', 'App\Http\Controllers\CalendarController@calendarEvents');
     Route::post('/{id}/clear', 'App\Http\Controllers\CalendarController@clearCalendar');
+    Route::get('/{id}/events', 'App\Http\Controllers\EventController@getCalendarEvents');
+    Route::post('/{id}/events', 'App\Http\Controllers\EventController@createCalendarEvent');
+    Route::patch('/{id}/events', 'App\Http\Controllers\EventController@updateCalendarEvent');
+    Route::delete('/{id}/events', 'App\Http\Controllers\EventController@deleteCalendarEvent');
 });
 Route::apiResource('calendars', 'App\Http\Controllers\CalendarController');
 
