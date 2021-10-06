@@ -71,16 +71,21 @@ class UserController extends Controller
 
     public function updateMe(UpdateUserRequest $request)
     {
-        if (!$data = User::find($this->user->id))
+        if (!$user = User::find($this->user->id))
             return response([
                 'message' => 'User does not exist.'
             ], 404);
 
-        $data->update($request->all());
+        $user->update($request->all());
         return response([
-            "message" => "Successfully updated.",
-            "user" => $data
-        ]);
+            "message" => "Successfully updated."
+        ])->cookie('user', json_encode([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'image' => $user->image,
+            'token' => $request->header('Authorization')
+        ]), JWTAuth::factory()->getTTL());
     }
 
     public function uploadAvatar(UploadAvatarRequest $request)
@@ -97,9 +102,14 @@ class UserController extends Controller
             ]);
 
             return response([
-                "message" => "Your avatar was uploaded.",
-                "image" => $image
-            ], 201);
+                "message" => "Your avatar was uploaded."
+            ], 201)->cookie('user', json_encode([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'image' => $image,
+                'token' => $request->header('Authorization')
+            ]), JWTAuth::factory()->getTTL());;
         }
     }
 }

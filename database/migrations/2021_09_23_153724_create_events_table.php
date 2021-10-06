@@ -19,7 +19,6 @@ class CreateEventsTable extends Migration
             $table->enum('category', ['Arrangement', 'Reminder', 'Task'])->default('Reminder')->charset('latin1')->collation('latin1_general_ci');
 
             $table->dateTime("target");
-            $table->integer("duration")->nullable();
             $table->boolean("system")->default(false);
 
             $table->timestamps();

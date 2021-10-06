@@ -38,6 +38,7 @@ Route::prefix('calendars')->middleware('auth')->group(function () {
     Route::post('/{id}/events', 'App\Http\Controllers\EventController@createCalendarEvent');
     Route::patch('/{id}/events', 'App\Http\Controllers\EventController@updateCalendarEvent');
     Route::delete('/{id}/events', 'App\Http\Controllers\EventController@deleteCalendarEvent');
+    Route::post('/{id}/holidays', 'App\Http\Controllers\EventController@parseHolidays');
 });
 Route::apiResource('calendars', 'App\Http\Controllers\CalendarController');
 
@@ -48,3 +49,5 @@ Route::apiResource('calendars', 'App\Http\Controllers\CalendarController');
 Route::prefix('events')->group(function () {
 });
 Route::apiResource('events', 'App\Http\Controllers\EventController');
+
+Route::get('/checkip', 'App\Http\Controllers\AuthController@checkip');

@@ -39,26 +39,31 @@ class AuthController extends Controller
         }
 
         return response([
-            'message' => 'User registered. Please log in',
-            'user' => $user
-        ]);
+            'message' => 'User registered. Logging in ...'
+        ])->cookie('user', json_encode([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'image' => $user->image,
+            'token' => "Bearer " . JWTAuth::attempt($request->only(['name', 'password']))
+        ]), JWTAuth::factory()->getTTL());
     }
 
     public function SignIn(SignInRequest $request)
     {
         try {
             $credentials = $request->only(['name', 'password']);
-            if (JWTAuth::attempt($credentials)) {
+            if ($token = JWTAuth::attempt($credentials)) {
                 $user = JWTAuth::user();
-                $token = JWTAuth::attempt($credentials);
-
                 return response([
-                    'message' => 'Signed in',
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
-                    'user' => $user
-                ]);
+                    'message' => 'Signed in'
+                ])->cookie('user', json_encode([
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'image' => $user->image,
+                    'token' => "Bearer " . $token
+                ]), JWTAuth::factory()->getTTL());
             }
 
             return response([
@@ -75,7 +80,7 @@ class AuthController extends Controller
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
-            return response(['message' => 'Successfully signed out']);
+            return response(['message' => 'Successfully signed out'])->withoutCookie('user');
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return response(['error' => $e->getMessage()], 401);
         }
@@ -94,5 +99,10 @@ class AuthController extends Controller
     public function me()
     {
         return JWTAuth::user(JWTAuth::getToken());
+    }
+
+    public function checkip(\Illuminate\Http\Request $request)
+    {
+        return response($request->ip(), 200);
     }
 }

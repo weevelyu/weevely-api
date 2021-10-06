@@ -70,27 +70,37 @@ class DatabaseSeeder extends Seeder
         $calendars->insert([
             'user_id' => 1,
             'title' => "My calendar",
-            'main' => true
+            'main' => true,
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
         $calendars->insert([
             'user_id' => 2,
             'title' => "My calendar",
-            'main' => true
+            'main' => true,
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
         $calendars->insert([
             'user_id' => 3,
             'title' => "My calendar",
-            'main' => true
+            'main' => true,
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
         $calendars->insert([
             'user_id' => 4,
             'title' => "My calendar",
-            'main' => true
+            'main' => true,
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
         $calendars->insert([
             'user_id' => 5,
             'title' => "My calendar",
-            'main' => true
+            'main' => true,
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
     }
 

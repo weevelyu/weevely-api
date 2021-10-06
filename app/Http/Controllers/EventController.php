@@ -29,7 +29,7 @@ class EventController extends Controller
         return Event::create($request->all());
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         if (!$data = Event::find($id))
             return response([
@@ -39,7 +39,7 @@ class EventController extends Controller
         return $data;
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         if (!$data = Event::find($id))
             return response([
@@ -50,7 +50,7 @@ class EventController extends Controller
         return $data;
     }
 
-    public function destroy($id)
+    public function destroy(int $id)
     {
         if (!Event::find($id))
             return response([
@@ -60,7 +60,7 @@ class EventController extends Controller
         return Event::destroy($id);
     }
 
-    public function getCalendarEvents($id)
+    public function getCalendarEvents(int $id)
     {
         if (!$data = Calendar::find($id))
             return response([
@@ -69,7 +69,7 @@ class EventController extends Controller
         return $data->events;
     }
 
-    public function createCalendarEvent(Request $request, $id)
+    public function createCalendarEvent(Request $request, int $id)
     {
         if (!Calendar::find($id))
             return response([
@@ -94,13 +94,10 @@ class EventController extends Controller
         else
             $data['target'] = \Carbon\Carbon::now()->addDay();
 
-        if ($request->input('duration'))
-            $data['duration'] = $request->input('duration');
-
         return Event::create($data);
     }
 
-    public function updateCalendarEvent(Request $request, $id)
+    public function updateCalendarEvent(Request $request, int $id)
     {
         if (!$object = Calendar::find($id))
             return response([
@@ -126,13 +123,10 @@ class EventController extends Controller
         if ($request->input('target'))
             $data['target'] = $request->input('target');
 
-        if ($request->input('duration'))
-            $data['duration'] = $request->input('duration');
-
         return Event::find($id)->update($data);
     }
 
-    public function deleteCalendarEvent($id)
+    public function deleteCalendarEvent(int $id)
     {
         if (!Calendar::find($id))
             return response([
@@ -140,5 +134,21 @@ class EventController extends Controller
             ], 404);
 
         return Event::destroy($id);
+    }
+
+    public function parseHolidays(Request $request, int $id)
+    {
+        $holidays = $request->input('holidays');
+        foreach ($holidays as $holiday) {
+            $data = [
+                'calendar_id' => $id,
+                'title' => $holiday->name,
+                'content' => 'Today is ' . $holiday->name . 'observed!',
+                'target' => \Carbon\Carbon::createFromFormat('Y-m-d', '2020-03-08')->setTime(10, 0),
+                'system' => true
+            ];
+            Event::create($data);
+        }
+        return response(['message' => 'Holidays successfully added to calendar.'], 201);
     }
 }
