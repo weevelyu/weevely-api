@@ -138,17 +138,23 @@ class EventController extends Controller
 
     public function parseHolidays(Request $request, int $id)
     {
-        $holidays = $request->input('holidays');
-        var_dump($holidays);
-        // foreach ($holidays as $holiday => $value) {
-        //     Event::create([
-        //         'calendar_id' => $id,
-        //         'title' => $value['name'],
-        //         'content' => 'Today is ' . $value['name'] . ' observed!',
-        //         'target' => \Carbon\Carbon::createFromFormat('Y-m-d', $value['name'])->setTime(10, 0),
-        //         'system' => true
-        //     ]);
-        // }
+        $holiday_api = new \HolidayAPI\Client(['key' => env('HOLIDAYAPI_ACCESS_KEY')]);
+        $holidays = $holiday_api->holidays([
+            'country' => $request->input('country'),
+            'year' => intval($request->input('year')),
+        ]);
+
+        $holidays = $holidays['holidays'];
+
+        foreach ($holidays as $holiday => $value) {
+            Event::create([
+                'calendar_id' => $id,
+                'title' => $value['name'],
+                'content' => 'Today is ' . $value['name'] . ' observed!',
+                'target' => \Carbon\Carbon::createFromFormat('Y-m-d', $value['date'])->setTime(10, 0),
+                'system' => true
+            ]);
+        }
         return response(['message' => 'Holidays successfully added to calendar.'], 201);
     }
 }
