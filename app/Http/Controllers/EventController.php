@@ -151,10 +151,13 @@ class EventController extends Controller
                 'calendar_id' => $id,
                 'title' => $value['name'],
                 'content' => 'Today is ' . $value['name'] . ' observed!',
-                'target' => \Carbon\Carbon::createFromFormat('Y-m-d', $value['date'])->setTime(10, 0),
+                'target' => \Carbon\Carbon::createFromFormat('Y-m-d', $value['date'])->setTime(10, 0)->addYear(),
                 'system' => true
             ]);
         }
-        return response(['message' => 'Holidays successfully added to calendar.'], 201);
+        return response([
+            'message' => 'Holidays successfully added to calendar.',
+            'calendar' => \App\Models\Calendar::show($id)
+        ], 201);
     }
 }
