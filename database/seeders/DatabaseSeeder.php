@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->seedUsers(DB::table('users'));
         $this->seedCalendars(DB::table('calendars'));
+        $this->attachUsers();
         // $this->seedEvents(DB::table('events'));
     }
 
@@ -68,40 +69,53 @@ class DatabaseSeeder extends Seeder
     protected function seedCalendars($calendars)
     {
         $calendars->insert([
-            'user_id' => 1,
             'title' => "My calendar",
             'main' => true,
             'created_at' => now(),
             'updated_at' => now()
         ]);
         $calendars->insert([
-            'user_id' => 2,
             'title' => "My calendar",
             'main' => true,
             'created_at' => now(),
             'updated_at' => now()
         ]);
         $calendars->insert([
-            'user_id' => 3,
             'title' => "My calendar",
             'main' => true,
             'created_at' => now(),
             'updated_at' => now()
         ]);
         $calendars->insert([
-            'user_id' => 4,
             'title' => "My calendar",
             'main' => true,
             'created_at' => now(),
             'updated_at' => now()
         ]);
         $calendars->insert([
-            'user_id' => 5,
             'title' => "My calendar",
             'main' => true,
             'created_at' => now(),
             'updated_at' => now()
         ]);
+        $calendars->insert([
+            'title' => "PXDD calendar",
+            'shared' => true,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+    }
+
+    protected function attachUsers()
+    {
+        \App\Models\Calendar::find(1)->users()->attach(1, ['is_owner' => true]);
+        \App\Models\Calendar::find(2)->users()->attach(2, ['is_owner' => true]);
+        \App\Models\Calendar::find(3)->users()->attach(3, ['is_owner' => true]);
+        \App\Models\Calendar::find(4)->users()->attach(4, ['is_owner' => true]);
+        \App\Models\Calendar::find(5)->users()->attach(5, ['is_owner' => true]);
+
+        \App\Models\Calendar::find(6)->users()->attach(1, ['is_owner' => true]);
+        \App\Models\Calendar::find(6)->users()->attach(2);
     }
 
     protected function seedEvents($events)

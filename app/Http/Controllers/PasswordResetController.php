@@ -2,26 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ForgotPasswordRequest;
-use App\Http\Requests\ResetPasswordRequest;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
-use App\Models\PasswordResets;
-use Illuminate\Support\Str;
+use App\Models\PasswordReset;
 use App\Models\User;
 
-class PasswordResetsController extends Controller
+class PasswordResetController extends Controller
 {
-    public function ForgotPassword(ForgotPasswordRequest $request)
+    public function ForgotPassword(\App\Http\Requests\ForgotPasswordRequest $request)
     {
         $user = User::where('email', $request->input('email'))->first();
-        $token = Str::random(10);
+        $token = \Illuminate\Support\Str::random(10);
 
         try {
-            if (PasswordResets::where('email', $user->email)->first())
-                PasswordResets::where('email', $user->email)->update(['token' => $token]);
+            if ($existing = PasswordReset::where('email', $user->email)->first())
+                $existing->update(['token' => $token]);
             else
-                PasswordResets::create([
+                PasswordReset::create([
                     'email' => $user->email,
                     'token' => $token
                 ]);
@@ -29,15 +24,15 @@ class PasswordResetsController extends Controller
             $protocol = explode('//', $request->header('referer'))[0];
             $host = explode('//', $request->header('referer'))[1];
             $data = [
-                'username' => $user->username,
                 'name' => $user->name,
                 'role' => $user->role,
                 'resetLink' => $protocol . '//' . $host  . 'forgot-password/' . $token,
-                'removeLink' => 'https://orbimind.herokuapp.com/api/auth/password-reset/' . $token . '/remove'
+                'removeLink' => 'https://orbimind.herokuapp.com/api/auth/reset-password/' . $token . '/remove'
             ];
-            Mail::send('forgot', $data, function ($message) use ($user) {
+
+            \Illuminate\Support\Facades\Mail::send('forgot', $data, function ($message) use ($user) {
                 $message->to($user->email);
-                $message->subject('Password reset confirmation');
+                $message->subject('Password reset confirmation.');
             });
 
             return response([
@@ -50,10 +45,10 @@ class PasswordResetsController extends Controller
         }
     }
 
-    public function ResetPassword(ResetPasswordRequest $request, mixed $token)
+    public function ResetPassword(\App\Http\Requests\ResetPasswordRequest $request, string $token)
     {
         try {
-            if (!$data = PasswordResets::where('token', $token)->first())
+            if (!$data = PasswordReset::where('token', $token)->first())
                 return response([
                     'message' => 'Invalid token!'
                 ], 400);
@@ -64,10 +59,10 @@ class PasswordResetsController extends Controller
                     'message' => 'User does not exist!'
                 ], 404);
 
-            $user->password = Hash::make($request->input('password'));
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->input('password'));
             $user->save();
 
-            PasswordResets::where('email', $data->email)->delete();
+            PasswordReset::where('email', $data->email)->delete();
         } catch (\Exception $exception) {
             return response([
                 'message' => $exception->getMessage()
@@ -78,9 +73,10 @@ class PasswordResetsController extends Controller
             'message' => 'Password reset successful'
         ]);
     }
+
     public function RemoveRequestPassword(mixed $token)
     {
-        if (!$data = PasswordResets::where('token', $token)->first())
+        if (!$data = PasswordReset::where('token', $token)->first())
             return response([
                 'message' => "Password reset token was not found!"
             ]);

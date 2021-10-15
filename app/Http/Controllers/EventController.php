@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Calendar;
 use App\Models\Event;
+use Carbon\Carbon;
 
 class EventController extends Controller
 {
@@ -66,78 +67,120 @@ class EventController extends Controller
             return response([
                 'message' => 'Calendar does not exist.'
             ], 404);
+
+        $access = false;
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
         return $data->events;
     }
 
-    public function createCalendarEvent(Request $request, int $id)
+    public function createCalendarEvent(\App\Http\Requests\CreateEventRequest $request, int $calendar_id)
     {
-        if (!Calendar::find($id))
+        if (!$calendar = Calendar::find($calendar_id))
             return response([
                 'message' => 'Calendar does not exist.'
             ], 404);
 
+        $access = false;
+        foreach ($calendar->users as $user)
+            if ($user->id === $this->user->id)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
         $data = [
-            'calendar_id' => $id
+            'calendar_id' => $calendar_id
         ];
 
-        if ($request->input('title'))
+        if ($request->exists('title'))
             $data['title'] = $request->input('title');
 
-        if ($request->input('content'))
+        if ($request->exists('content'))
             $data['content'] = $request->input('content');
 
-        if ($request->input('category'))
+        if ($request->exists('category'))
             $data['category'] = $request->input('category');
 
-        if ($request->input('target'))
-            $data['target'] = $request->input('target');
+        if ($request->exists('target'))
+            $data['target'] = Carbon::createFromFormat('Y-m-d', $request->input('target'))->addHour();
         else
-            $data['target'] = \Carbon\Carbon::now()->addDay();
+            $data['target'] = Carbon::now()->addHour();
 
         return Event::create($data);
     }
 
-    public function updateCalendarEvent(Request $request, int $id)
+    public function updateCalendarEvent(\App\Http\Requests\UpdateEventRequest $request, int $calendar_id, int $event_id)
     {
-        if (!$object = Calendar::find($id))
+        if (!$calendar = Calendar::find($calendar_id))
             return response([
                 'message' => 'Calendar does not exist.'
             ], 404);
 
-        if ($object->user_id !== $this->user->id)
-            return response([
-                'message' => 'You can not edit this event.'
-            ], 404);
+        $access = false;
+        foreach ($calendar->users as $user)
+            if ($user->id === $this->user->id)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
 
         $data = [];
 
-        if ($request->input('title'))
+        if ($request->exists('title'))
             $data['title'] = $request->input('title');
 
-        if ($request->input('content'))
+        if ($request->exists('content'))
             $data['content'] = $request->input('content');
 
-        if ($request->input('category'))
+        if ($request->exists('category'))
             $data['category'] = $request->input('category');
 
-        if ($request->input('target'))
-            $data['target'] = $request->input('target');
+        if ($request->exists('target'))
+            $data['target'] = Carbon::createFromFormat('Y-m-d H:i:s', $request->input('target'))->subHours(3);
 
-        return Event::find($id)->update($data);
+        Event::find($event_id)->update($data);
+        return Event::find($event_id);
     }
 
-    public function deleteCalendarEvent(int $id)
+    public function deleteCalendarEvent(int $calendar_id, int $event_id)
     {
-        if (!Calendar::find($id))
+        if (!$calendar = Calendar::find($calendar_id))
             return response([
                 'message' => 'Calendar does not exist.'
             ], 404);
 
-        return Event::destroy($id);
+        $access = false;
+        foreach ($calendar->users as $user)
+            if ($user->id === $this->user->id)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
+        return Event::destroy($event_id);
     }
 
-    public function parseHolidays(Request $request, int $id)
+    public function parseHolidays(\App\Http\Requests\ParseHolidaysRequest $request, int $id)
     {
+        if (!$calendar = Calendar::find($id))
+            return response([
+                'message' => 'Calendar does not exist.'
+            ], 404);
+
+        $access = false;
+        foreach ($calendar->users as $user)
+            if ($user->id === $this->user->id && $user->calendar_user->is_owner)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
         $holiday_api = new \HolidayAPI\Client(['key' => env('HOLIDAYAPI_ACCESS_KEY')]);
         $holidays = $holiday_api->holidays([
             'country' => $request->input('country'),
@@ -151,7 +194,7 @@ class EventController extends Controller
                 'calendar_id' => $id,
                 'title' => $value['name'],
                 'content' => 'Today is ' . $value['name'] . ' observed!',
-                'target' => \Carbon\Carbon::createFromFormat('Y-m-d', $value['date'])->setTime(10, 0)->addYear(),
+                'target' => Carbon::createFromFormat('Y-m-d', $value['date'])->setTime(10, 0)->addYear(),
                 'system' => true
             ]);
         }

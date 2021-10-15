@@ -10,7 +10,7 @@ width: 100%;">
         padding: 40px 0;
         margin: 0;
         font-family: Poppins, Arial, Helvetica;
-        font-weight: 400;">Hello, <span style="font-weight: 600;">{{$username}}!<span></h1>
+        font-weight: 400;">Hello, <span style="font-weight: 600;">{{$name}}!<span></h1>
     </section>
     <section style="display: block;">
         <p style="font-family: Poppins, Arial, Helvetica;">Greetings, <span style="font-weight: 600;">{{$name}}</span>!</p>
@@ -33,6 +33,6 @@ width: 100%;">
     align-items: center;
     padding: 10px 0;
     background-color:#f5f9ff;">
-        <p style="font-family: Poppins, Arial, Helvetica; text-align:center;">This message was sent automatically. You don't need to reply to it.<br>Orbimind<br>Copyright © 2021 Paul Litovka. All rights reserved.</p>
+        <p style="font-family: Poppins, Arial, Helvetica; text-align:center;">This message was sent automatically. You don't need to reply to it.<br>Weevely<br>Copyright © 2021 Paul Litovka. All rights reserved.</p>
     </section>
 </main>

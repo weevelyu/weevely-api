@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\Calendar;
-use App\Models\Handler;
 
 class CalendarController extends Controller
 {
@@ -14,9 +13,10 @@ class CalendarController extends Controller
         $this->middleware('auth.admin')->only([
             'index',
             'store',
-            'update',
         ]);
         $this->middleware('auth')->only([
+            'show',
+            'update',
             'destroy',
         ]);
         $this->user = JWTAuth::user(JWTAuth::getToken());
@@ -39,7 +39,15 @@ class CalendarController extends Controller
                 'message' => 'Calendar does not exist'
             ], 404);
 
-        $data['events'] = Calendar::find($id)->events;
+        $access = false;
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
+        $data['events'] = $data->events;
         return $data;
     }
 
@@ -49,7 +57,16 @@ class CalendarController extends Controller
             return response([
                 'message' => 'Calendar does not exist'
             ], 404);
-        $data->update($request->all());
+
+        $access = false;
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id && $user->calendar_user->is_owner)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
+        $data->update($request->only(['title']));
 
         return $data;
     }
@@ -58,37 +75,143 @@ class CalendarController extends Controller
     {
         if (!$data = Calendar::find($id))
             return response([
-                'message' => 'Calendar does not exist'
+                'message' => 'Calendar does not exist.'
             ], 404);
 
-        if (Handler::isAdmin($this->user))
+        if ($this->user->role === "admin" && $this->user !== null) {
+            $data->users()->detach();
             return Calendar::destroy($id);
+        }
 
-        if ($data->user_id !== $this->user->id || $data->main)
+        $access = false;
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id && $user->calendar_user->is_owner)
+                $access = true;
+        if (!$access) return response([
+            'message' => 'You do not have access to this calendar.'
+        ], 403);
+
+        if ($data->main)
             return response(["message" => "You can not delete this calendar."], 401);
 
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id && $user->calendar_user->is_owner) {
+                $data->users()->detach();
+                Calendar::destroy($id);
+                return response(["message" => "Calendar successfuly deleted."], 201);
+            }
 
-        return Calendar::destroy($id) ? response(["message" => "Calendar successfuly deleted."], 201) : response(["message" => "You can not delete this calendar."], 401);
+        return response(["message" => "You can not delete this calendar."], 401);
     }
 
-    public function showCalendars()
+    public function showCalendars(string $type)
     {
-        $data = \App\Models\User::find($this->user->id)->calendars;
-        foreach ($data as $value)
-            $value["events"] = Calendar::find($value->id)->events;
-        return $data;
+        switch ($type) {
+            case 'all':
+                $data = \App\Models\User::find($this->user->id)->calendars;
+                foreach ($data as $value) {
+                    $calendar = Calendar::find($value->id);
+                    $value["events"] = $calendar->events;
+                    $value["users"] = $calendar->users;
+                }
+                return $data;
+            case 'private':
+                $data = \App\Models\User::with('owner')->find($this->user->id)->owner->where('hidden', false);
+                foreach ($data as $value) {
+                    $calendar = Calendar::find($value->id);
+                    $value["events"] = $calendar->events;
+                    $value["users"] = $calendar->users;
+                }
+                return $data;
+            case 'shared':
+                $data = \App\Models\User::with('shared')->find($this->user->id)->shared->where('hidden', false);
+                foreach ($data as $value) {
+                    $calendar = Calendar::find($value->id);
+                    $value["events"] = $calendar->events;
+                    $value["users"] = $calendar->users;
+                }
+                return $data;
+            case 'hidden':
+                $data = \App\Models\User::find($this->user->id)->calendars->where('hidden', true);
+                $counter = 0;
+                foreach ($data as $value) {
+                    $calendar = Calendar::find($value->id);
+                    $value["events"] = $calendar->events;
+                    $value["users"] = $calendar->users;
+                    $counter++;
+                }
+                if ($counter === 1)
+                    $data = [$data['1']];
+                return $data;
+        }
+
+        return response(['message' => 'Supported types are "all", "private", "shared", "hidden"'], 500);
     }
 
-    public function createCalendar(Request $request)
+    public function createCalendar(\App\Http\Requests\CreateCalendarRequest $request)
     {
-        $data = [
-            'user_id' => $this->user->id,
-            'title' => $request->input('title') ? $request->input('title') : "New Calendar"
-        ];
+        $calendar = Calendar::create(['title' => $request->input('title') ? $request->input('title') : "New Calendar"]);
+        Calendar::find($calendar->id)->users()->attach($this->user->id, ['is_owner' => true]);
 
         return response([
             "message" => "Calendar successfuly created.",
-            "calendar" => Calendar::create($data)
+            "calendar" => $calendar,
         ], 201);
+    }
+
+    public function shareCalendar(\App\Http\Requests\ShareCalendarRequest $request, $id)
+    {
+        if (!$data = Calendar::find($id))
+            return response([
+                'message' => 'Calendar does not exist.'
+            ], 404);
+
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id && $user->calendar_user->is_owner) {
+                $list = json_decode($request->input('users'));
+
+                $new_users = [$this->user->id];
+                foreach ($list as $obj) {
+                    if (!$new_user = \App\Models\User::where('name', $obj)->orWhere('shareId', $obj)->first())
+                        continue;
+                    if ($new_user->id === $this->user->id)
+                        continue;
+                    array_push($new_users, $new_user->id);
+                }
+                $data->users()->sync($new_users);
+
+                $data = Calendar::find($id);
+                if (count($data->users) > 1 && !$data->shared)
+                    $data->update(['shared' => true]);
+                else $data->update(['shared' => false]);
+
+                return response([
+                    'message' => 'Calendar shared.'
+                ], 201);
+            }
+
+        return response([
+            'message' => 'You can not share this calendar.'
+        ], 404);
+    }
+
+    public function hideCalendar($id)
+    {
+        if (!$data = Calendar::find($id))
+            return response([
+                'message' => 'Calendar does not exist.'
+            ], 404);
+
+        foreach ($data->users as $user)
+            if ($user->id === $this->user->id && $user->calendar_user->is_owner) {
+                $data->update(['hidden' => !$data->hidden]);
+                return response([
+                    'message' => 'Calendar was hidden: ' . $data->hidden
+                ], 201);
+            }
+
+        return response([
+            'message' => 'You can not hide this calendar.'
+        ], 404);
     }
 }

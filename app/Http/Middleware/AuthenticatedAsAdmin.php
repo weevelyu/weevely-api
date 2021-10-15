@@ -2,16 +2,14 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use App\Models\Handler;
 
 class AuthenticatedAsAdmin
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(\Illuminate\Http\Request $request, \Closure $next)
     {
-        if (!Handler::isAdmin(JWTAuth::user(JWTAuth::getToken())))
+        $user = JWTAuth::user(JWTAuth::getToken());
+        if ($user->role === "admin" && $user !== null)
             return response([
                 'message' => 'Unauthenticated or not enough permissions.'
             ], 403);

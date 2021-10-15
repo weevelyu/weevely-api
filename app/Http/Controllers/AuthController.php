@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterRequest;
-use App\Http\Requests\SignInRequest;
-use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function Register(RegisterRequest $request)
+    public function register(\App\Http\Requests\RegisterRequest $request)
     {
         try {
             $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -19,19 +16,19 @@ class AuthController extends Controller
                 $index = rand(0, strlen($characters) - 1);
                 $randomString .= $characters[$index];
             }
+
             $user = User::create([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
                 'image' => 'https://d3djy7pad2souj.cloudfront.net/weevely/avatar' . rand(1, 5) . '_weevely_H265P.png',
-                'password' => Hash::make($request->input('password')),
+                'password' => \Illuminate\Support\Facades\Hash::make($request->input('password')),
                 'shareId' => $randomString
             ]);
 
             \App\Models\Calendar::create([
-                'user_id' => $user->id,
                 'title' => "My calendar",
                 'main' => true,
-            ]);
+            ])->users()->attach($user->id, ['is_owner' => true]);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage()
@@ -49,7 +46,7 @@ class AuthController extends Controller
         ]), JWTAuth::factory()->getTTL());
     }
 
-    public function SignIn(SignInRequest $request)
+    public function signIn(\App\Http\Requests\SignInRequest $request)
     {
         try {
             $credentials = $request->only(['name', 'password']);
@@ -76,7 +73,7 @@ class AuthController extends Controller
         }
     }
 
-    public function SignOut()
+    public function signOut()
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
@@ -86,7 +83,7 @@ class AuthController extends Controller
         }
     }
 
-    public function refresh()
+    public function refreshToken()
     {
         try {
             $newToken = JWTAuth::refresh(JWTAuth::getToken());
@@ -98,11 +95,6 @@ class AuthController extends Controller
 
     public function me()
     {
-        return JWTAuth::user(JWTAuth::getToken());
-    }
-
-    public function checkip(\Illuminate\Http\Request $request)
-    {
-        return response($request->ip(), 200);
+        return JWTAuth::user();
     }
 }

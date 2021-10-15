@@ -1,53 +1,39 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\EventController;
 
-/**
- * Authorization module
- */
 Route::prefix('auth')->group(function () {
-    Route::post('/register', 'App\Http\Controllers\AuthController@Register');
-    Route::post('/signin', 'App\Http\Controllers\AuthController@SignIn');
-    Route::post('/signout', 'App\Http\Controllers\AuthController@SignOut')->middleware('auth');
-    Route::get('/refresh', 'App\Http\Controllers\AuthController@refresh')->middleware('auth');
-    Route::get('/me', 'App\Http\Controllers\AuthController@me')->middleware('auth');
-    Route::post('/password-reset', 'App\Http\Controllers\PasswordResetsController@ForgotPassword');
-    Route::post('/password-reset/{token}', 'App\Http\Controllers\PasswordResetsController@ResetPassword');
-    Route::get('/password-reset/{token}/remove', 'App\Http\Controllers\PasswordResetsController@RemoveRequestPassword');
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/signin', [AuthController::class, 'signIn']);
+    Route::post('/signout', [AuthController::class, 'signOut'])->middleware('auth');
+    Route::get('/refresh', [AuthController::class, 'refreshToken'])->middleware('auth');
+    Route::get('/me', [AuthController::class, 'me'])->middleware('auth');
+    Route::post('/reset-password', [PasswordResetController::class, 'ForgotPassword']);
+    Route::post('/reset-password/{token}', [PasswordResetController::class, 'ResetPassword']);
+    Route::get('/reset-password/{token}/remove', [PasswordResetController::class, 'RemoveRequestPassword']);
 });
 
-
-/**
- * User control module
- */
 Route::prefix('users')->middleware('auth')->group(function () {
-    Route::patch('/me', 'App\Http\Controllers\UserController@updateMe');
-    Route::post('/me/avatar', 'App\Http\Controllers\UserController@uploadAvatar');
+    Route::patch('/me', [UserController::class, 'updateMe']);
+    Route::post('/me/avatar', [UserController::class, 'uploadAvatar']);
 });
-Route::apiResource('users', 'App\Http\Controllers\UserController');
+Route::apiResource('users', UserController::class);
 
-
-/**
- * Calendar and event control module
- */
 Route::prefix('calendars')->middleware('auth')->group(function () {
-    Route::get('/my', 'App\Http\Controllers\CalendarController@showCalendars');
-    Route::post('/my', 'App\Http\Controllers\CalendarController@createCalendar');
-    Route::post('/{id}/clear', 'App\Http\Controllers\CalendarController@clearCalendar');
-    Route::get('/{id}/events', 'App\Http\Controllers\EventController@getCalendarEvents');
-    Route::post('/{id}/events', 'App\Http\Controllers\EventController@createCalendarEvent');
-    Route::patch('/{id}/events', 'App\Http\Controllers\EventController@updateCalendarEvent');
-    Route::delete('/{id}/events', 'App\Http\Controllers\EventController@deleteCalendarEvent');
-    Route::post('/{id}/holidays', 'App\Http\Controllers\EventController@parseHolidays');
+    Route::post('/my', [CalendarController::class, 'createCalendar']);
+    Route::get('/my/{type}', [CalendarController::class, 'showCalendars']);
+    Route::post('/{id}/share', [CalendarController::class, 'shareCalendar']);
+    Route::post('/{id}/hide', [CalendarController::class, 'hideCalendar']);
+    Route::get('/{id}/events', [EventController::class, 'getCalendarEvents']);
+    Route::post('/{calendar_id}/events', [EventController::class, 'createCalendarEvent']);
+    Route::patch('/{calendar_id}/events/{event_id}', [EventController::class, 'updateCalendarEvent']);
+    Route::delete('/{calendar_id}/events/{event_id}', [EventController::class, 'deleteCalendarEvent']);
+    Route::post('/{id}/holidays', [EventController::class, 'parseHolidays']);
 });
-Route::apiResource('calendars', 'App\Http\Controllers\CalendarController');
-
-
-/**
- * Events control module
- */
-Route::prefix('events')->group(function () {
-});
-Route::apiResource('events', 'App\Http\Controllers\EventController');
-
-Route::get('/checkip', 'App\Http\Controllers\AuthController@checkip');
+Route::apiResource('calendars', CalendarController::class);
+Route::apiResource('events', EventController::class);

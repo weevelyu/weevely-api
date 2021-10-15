@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('shareId', 10)->unique()->charset('utf8mb4')->collation('utf8mb4_general_ci');
             $table->enum('role', ['user', 'admin'])->default('user')->charset('latin1')->collation('latin1_general_ci');
 
+            $table->rememberToken();
             $table->timestamps();
         });
     }

@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Event extends Model
+class Event extends \Illuminate\Database\Eloquent\Model
 {
-    use HasFactory;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
 
     protected $fillable = [
         'calendar_id',
@@ -15,7 +12,6 @@ class Event extends Model
         'content',
         'category',
         'target',
-        'duration',
         'system'
     ];
 
@@ -25,12 +21,11 @@ class Event extends Model
         'content' => 'string',
         'category' => 'string',
         'target' => 'datetime',
-        'duration' => 'integer',
         'system' => 'boolean'
     ];
 
     public function calendar()
     {
-        return $this->hasOne(Calendar::class);
+        return $this->belongsTo(Calendar::class);
     }
 }

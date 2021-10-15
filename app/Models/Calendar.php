@@ -2,15 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Calendar extends Model
+class Calendar extends \Illuminate\Database\Eloquent\Model
 {
-    use HasFactory;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
 
     protected $fillable = [
-        'user_id',
         'title',
         'main',
         'hidden',
@@ -18,7 +14,6 @@ class Calendar extends Model
     ];
 
     protected $casts = [
-        'user_id' => 'integer',
         'title' => 'string',
         'main' => 'boolean',
         'hidden' => 'boolean',
@@ -27,7 +22,7 @@ class Calendar extends Model
 
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class)->withPivot(['is_owner'])->as('calendar_user');
     }
 
     public function events()
