@@ -133,16 +133,14 @@ class CalendarController extends Controller
                 return $data;
             case 'hidden':
                 $data = \App\Models\User::find($this->user->id)->calendars->where('hidden', true);
-                $counter = 0;
+                $array = [];
                 foreach ($data as $value) {
                     $calendar = Calendar::find($value->id);
                     $value["events"] = $calendar->events;
                     $value["users"] = $calendar->users;
-                    $counter++;
+                    array_push($array, $value);
                 }
-                if ($counter === 1)
-                    $data = [$data['1']];
-                return $data;
+                return $array;
         }
 
         return response(['message' => 'Supported types are "all", "private", "shared", "hidden"'], 500);

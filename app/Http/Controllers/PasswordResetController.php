@@ -27,7 +27,7 @@ class PasswordResetController extends Controller
                 'name' => $user->name,
                 'role' => $user->role,
                 'resetLink' => $protocol . '//' . $host  . 'forgot-password/' . $token,
-                'removeLink' => 'https://orbimind.herokuapp.com/api/auth/reset-password/' . $token . '/remove'
+                'removeLink' => 'https://weevely.herokuapp.com/api/auth/reset-password/' . $token . '/remove'
             ];
 
             \Illuminate\Support\Facades\Mail::send('forgot', $data, function ($message) use ($user) {
