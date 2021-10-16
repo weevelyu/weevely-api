@@ -7,24 +7,26 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EventController;
 
-Route::prefix('auth')->group(function () {
+Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/signin', [AuthController::class, 'signIn']);
-    Route::post('/signout', [AuthController::class, 'signOut'])->middleware('auth');
-    Route::get('/refresh', [AuthController::class, 'refreshToken'])->middleware('auth');
-    Route::get('/me', [AuthController::class, 'me'])->middleware('auth');
     Route::post('/reset-password', [PasswordResetController::class, 'ForgotPassword']);
     Route::post('/reset-password/{token}', [PasswordResetController::class, 'ResetPassword']);
     Route::get('/reset-password/{token}/remove', [PasswordResetController::class, 'RemoveRequestPassword']);
+    Route::group(['middleware' => 'auth'], function () {
+        Route::post('/signout', [AuthController::class, 'signOut']);
+        Route::get('/refresh', [AuthController::class, 'refreshToken']);
+        Route::get('/me', [AuthController::class, 'me']);
+    });
 });
 
-Route::prefix('users')->middleware('auth')->group(function () {
+Route::group(['prefix' => 'users', 'middleware' => 'auth'], function () {
     Route::patch('/me', [UserController::class, 'updateMe']);
     Route::post('/me/avatar', [UserController::class, 'uploadAvatar']);
 });
 Route::apiResource('users', UserController::class);
 
-Route::prefix('calendars')->middleware('auth')->group(function () {
+Route::group(['prefix' => 'calendars', 'middleware' => 'auth'], function () {
     Route::post('/my', [CalendarController::class, 'createCalendar']);
     Route::get('/my/{type}', [CalendarController::class, 'showCalendars']);
     Route::post('/{id}/share', [CalendarController::class, 'shareCalendar']);

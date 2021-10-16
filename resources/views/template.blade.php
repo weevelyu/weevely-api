@@ -33,12 +33,7 @@
         <meta name='theme-color' content='#7c6aef' />
         <meta http-equiv="pragma" content="no-cache" />
         <meta http-equiv="cache-control" content="no-cache" />
-
         <title id="pageTitle">Weevely</title>
-
-        <link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
-
-        <script src="/assets/js/script.js" defer type="text/JavaScript"></script>
     </head>
     <body class="antialiased" style="margin: 0; padding: 0;">
         @yield('body')

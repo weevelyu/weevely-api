@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
+\Illuminate\Support\Facades\Route::get('/', function () {
     return view('home');
 });

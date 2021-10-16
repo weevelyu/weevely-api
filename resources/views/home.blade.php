@@ -6,19 +6,23 @@ align-items: center;
 flex-direction: column;
 width: 100vw;
 height: 100vh;
-background-color: #7c6aef;">
-<img src="https://raw.githubusercontent.com/PAXANDDOS/PAXANDDOS/main/orbimind/logo.svg">
+background-color: #6775ee;">
+<img src="https://raw.githubusercontent.com/PAXANDDOS/PAXANDDOS/main/weevely/weevely-banner.png" style="width: 80%">
 <h1 style="display:block;
 font-family: Poppins, Arial, Helvetica;
-color: white;">
-Orbimind</h1>
+color: rgb(250, 249, 250);
+margin: 0;
+text-align: center;">
+Weevely</h1>
 <h2 style="display:block;
 font-family: Poppins, Arial, Helvetica;
-color: white;">
-Where great minds are in the same orbit</h2>
+color: rgb(250, 249, 250);
+text-align: center;">
+Simple event calendar built with Next.js and React.js that can be used for creating, managing, and searching for events.</h2>
 <span style="display:block;
 font-family: Poppins, Arial, Helvetica;
-color: white;">
-You're on the server host, please refer to PAXANDDOS/orbimind-react to find more</span>
+color: rgb(250, 249, 250);
+text-align: center;">
+You're on the server host, please refer to PAXANDDOS/weevely-next to find more</span>
 </main>
 @endsection
