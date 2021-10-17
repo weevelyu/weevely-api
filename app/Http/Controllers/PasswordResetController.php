@@ -26,7 +26,7 @@ class PasswordResetController extends Controller
             $data = [
                 'name' => $user->name,
                 'role' => $user->role,
-                'resetLink' => $protocol . '//' . $host  . 'forgot-password/' . $token,
+                'resetLink' => $protocol . '//' . $host  . 'reset-password/' . $token,
                 'removeLink' => 'https://weevely.herokuapp.com/api/auth/reset-password/' . $token . '/remove'
             ];
 
