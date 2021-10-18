@@ -142,7 +142,7 @@ class EventController extends Controller
             $data['category'] = $request->input('category');
 
         if ($request->exists('target'))
-            $data['target'] = Carbon::createFromFormat('Y-m-d H:i:s', $request->input('target'))->subHours(3);
+            $data['target'] = Carbon::createFromFormat('Y-m-d H:i:s', $request->input('target'));
 
         Event::find($event_id)->update($data);
         return Event::find($event_id);

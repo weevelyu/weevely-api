@@ -15,7 +15,7 @@ class UpdateEventRequest extends FormRequest
     {
         return [
             'title' => 'string|max:42',
-            'content' => 'string|max:255',
+            'content' => 'string|nullable|max:255',
             'category' => 'string|in:Task,Reminder,Arrangement',
             'target' => 'date_format:Y-m-d H:i:s'
         ];
