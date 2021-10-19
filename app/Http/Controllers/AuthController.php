@@ -36,14 +36,16 @@ class AuthController extends Controller
         }
 
         return response([
-            'message' => 'User registered. Logging in ...'
-        ])->cookie('user', json_encode([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'image' => $user->image,
-            'token' => "Bearer " . JWTAuth::attempt($request->only(['name', 'password']))
-        ]), JWTAuth::factory()->getTTL());
+            'message' => 'User registered. Logging in ...',
+            'cookie' => json_encode([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'image' => $user->image,
+                'token' => "Bearer " . JWTAuth::attempt($request->only(['name', 'password'])),
+                'ttl' => JWTAuth::factory()->getTTL()
+            ])
+        ], 200);
     }
 
     public function signIn(\App\Http\Requests\SignInRequest $request)
@@ -53,14 +55,22 @@ class AuthController extends Controller
             if ($token = JWTAuth::attempt($credentials)) {
                 $user = JWTAuth::user();
                 return response([
-                    'message' => 'Signed in'
-                ])->cookie('user', json_encode([
+                    'message' => 'Signed in',
+                    'cookie' => json_encode([
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'image' => $user->image,
+                        'token' => "Bearer " . $token,
+                        'ttl' => JWTAuth::factory()->getTTL()
+                    ])
+                ])->withCookie(cookie('user', json_encode([
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'image' => $user->image,
                     'token' => "Bearer " . $token
-                ]), JWTAuth::factory()->getTTL());
+                ]), JWTAuth::factory()->getTTL()));
             }
 
             return response([

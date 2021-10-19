@@ -78,14 +78,22 @@ class UserController extends Controller
 
         $user->update($request->all());
         return response([
-            "message" => "Successfully updated."
-        ])->cookie('user', json_encode([
+            "message" => "Successfully updated.",
+            'cookie' => json_encode([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'image' => $user->image,
+                'token' => "Bearer " . $request->header('Authorization'),
+                'ttl' => JWTAuth::factory()->getTTL()
+            ])
+        ])->withCookie(cookie('user', json_encode([
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'image' => $user->image,
-            'token' => $request->header('Authorization')
-        ]), JWTAuth::factory()->getTTL());
+            'token' => "Bearer " . $request->header('Authorization')
+        ]), JWTAuth::factory()->getTTL()));
     }
 
     public function uploadAvatar(UploadAvatarRequest $request)
@@ -102,14 +110,22 @@ class UserController extends Controller
             ]);
 
             return response([
-                "message" => "Your avatar was uploaded."
-            ], 201)->cookie('user', json_encode([
+                "message" => "Your avatar was uploaded.",
+                'cookie' => json_encode([
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'image' => $image,
+                    'token' => "Bearer " . $request->header('Authorization'),
+                    'ttl' => JWTAuth::factory()->getTTL()
+                ])
+            ], 201)->withCookie(cookie('user', json_encode([
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'image' => $image,
                 'token' => $request->header('Authorization')
-            ]), JWTAuth::factory()->getTTL());;
+            ]), JWTAuth::factory()->getTTL()));
         }
     }
 }
