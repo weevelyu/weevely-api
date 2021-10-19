@@ -84,7 +84,7 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'image' => $user->image,
-                'token' => "Bearer " . $request->header('Authorization'),
+                'token' => $request->header('Authorization'),
                 'ttl' => JWTAuth::factory()->getTTL() * 60
             ])
         ])->withCookie(cookie('user', json_encode([
@@ -92,7 +92,7 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'image' => $user->image,
-            'token' => "Bearer " . $request->header('Authorization')
+            'token' => $request->header('Authorization')
         ]), JWTAuth::factory()->getTTL()));
     }
 
@@ -116,7 +116,7 @@ class UserController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'image' => $image,
-                    'token' => "Bearer " . $request->header('Authorization'),
+                    'token' => $request->header('Authorization'),
                     'ttl' => JWTAuth::factory()->getTTL() * 60
                 ])
             ], 201)->withCookie(cookie('user', json_encode([
