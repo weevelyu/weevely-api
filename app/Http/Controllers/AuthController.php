@@ -43,7 +43,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'image' => $user->image,
                 'token' => "Bearer " . JWTAuth::attempt($request->only(['name', 'password'])),
-                'ttl' => JWTAuth::factory()->getTTL()
+                'ttl' => JWTAuth::factory()->getTTL() * 60
             ])
         ], 200);
     }
@@ -62,7 +62,7 @@ class AuthController extends Controller
                         'email' => $user->email,
                         'image' => $user->image,
                         'token' => "Bearer " . $token,
-                        'ttl' => JWTAuth::factory()->getTTL()
+                        'ttl' => JWTAuth::factory()->getTTL() * 60
                     ])
                 ])->withCookie(cookie('user', json_encode([
                     'id' => $user->id,
