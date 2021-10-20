@@ -82,5 +82,5 @@ You can easily host this API on your server if you want to. But if you only want
 | Add holidays     | `/api/calendars/{calendar_id}/holidays` | `POST` | Bearer token, calendar_id, data (country, year) |
 
 ## :fox_face: Have a great day!
-**Don't forget to check out [Weevely with Next.js](https://github.com/PAXANDDOS?tab=repositories)**  
+**Don't forget to check out [Weevely with Next.js](https://github.com/PAXANDDOS/weevely-next)**  
 **[Also check out my other projects](https://github.com/PAXANDDOS?tab=repositories) and [visit my website](https://paxanddos.github.io)!**
