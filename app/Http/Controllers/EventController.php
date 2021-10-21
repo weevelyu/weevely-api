@@ -200,7 +200,7 @@ class EventController extends Controller
         }
         return response([
             'message' => 'Holidays successfully added to calendar.',
-            'calendar' => \App\Models\Calendar::show($id)
+            'calendar' => \App\Models\Calendar::find($id)
         ], 201);
     }
 }
