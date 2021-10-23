@@ -30,10 +30,15 @@
 - MySQL 6.x / MariaDB 10.x
 - Composer 2.x
 
+**macOS installation:**  
 You can easily install those via Homebrew:  
 ```bash
 brew install php mysql composer
 ```
+**Windows installation:**  
+1. Download and install latest version of [XAMPP](https://www.apachefriends.org/). It will install you both PHP and MariaDB. Whenever you want to use your database, open XAMPP and start MySQL process. To access PhpMyAdmin, start both Apache and MySQL processes, click Admin button next to MySQL
+2. Download and install latest version of [Composer](https://getcomposer.org/Composer-Setup.exe). A PHP dependency manager.
+
 ## :toolbox: Run API Locally
 
 You can easily host this API on your server if you want to. But if you only want to work with data that is used by official Weevely, you can skip this step.
@@ -51,35 +56,38 @@ You can easily host this API on your server if you want to. But if you only want
 ## :key: API Reference
 
 #### Authorization module
-| Action | Request | Method  | Requirements |
-| :----- | :------ | :------ | :----------- |
-| Register        | `/api/auth/register` | `POST` | Data |
-| Sign in         | `/api/auth/signin`   | `POST` | Data |
-| Sign out        | `/api/auth/signout`  | `POST` | Bearer token |
-| Reset password  | `/api/auth/reset-password`   | `POST` | Data |
-| Change password | `/api/auth/reset-password/{token}`   | `POST` | Data, token |
-| Remove request  | `/api/auth/reset-password/{token}/remove` | `GET` | Token | 
-| Refresh token   | `/api/auth/refresh`   | `GET` | Bearer token |
-| Get user        | `/api/auth/me`   | `GET` | Bearer token | 
+| Action          | Request                                   | Method | Requirements |
+| :-------------- | :---------------------------------------- | :----- | :----------- |
+| Register        | `/api/auth/register`                      | `POST` | Data         |
+| Sign in         | `/api/auth/signin`                        | `POST` | Data         |
+| Sign out        | `/api/auth/signout`                       | `POST` | Bearer token |
+| Reset password  | `/api/auth/reset-password`                | `POST` | Data         |
+| Change password | `/api/auth/reset-password/{token}`        | `POST` | Data, token  |
+| Remove request  | `/api/auth/reset-password/{token}/remove` | `GET`  | Token        | 
+| Refresh token   | `/api/auth/refresh`                       | `GET`  | Bearer token |
+| Get user        | `/api/auth/me`                            | `GET`  | Bearer token | 
 
 #### User module
-| Action | Request | Method  | Requirements |
-| :----- | :------ | :------ | :----------- |
-| Update data   | `/api/users/me`| `PATCH` | Bearer token, data |
+| Action        | Request                  | Method  | Requirements       |
+| :------------ | :----------------------- | :------ | :----------------- |
+| Update data   | `/api/users/me`          | `PATCH` | Bearer token, data |
 | Upload avatar | `/api/users/me/avatar`   | `POST`  | Bearer token, data |
 
 #### Calendars and events module
-| Action | Request | Method  | Requirements |
-| :----- | :------ | :------ | :----------- |
-| Get my calendars | `/api/calendars/my/{type}` | `GET` | Bearer token, type |
-| Create calendar  | `/api/calendars/my`   | `POST` | Bearer token, data (optional) |
-| Share calendar   | `/api/calendars/{calendar_id}/share` | `POST` | Bearer token, calendar_id, users (json string) |
-| Hide calendar    | `/api/calendars/{calendar_id}/hide`   | `POST` | Bearer token, calendar_id |
-| Get events       | `/api/calendars/{calendar_id}/events` | `GET` | Bearer token, calendar_id |
-| Create event     | `/api/calendars/{calendar_id}/events` | `POST` | Bearer token, calendar_id, data (optional) |
-| Update event     | `/api/calendars/{calendar_id}/events/{event_id}`  | `PATCH` | Bearer token, calendar_id, data |
-| Delete event     | `/api/calendars/{calendar_id}/events/{event_id}`   | `DELETE` | Bearer token, calendar_id |
-| Add holidays     | `/api/calendars/{calendar_id}/holidays` | `POST` | Bearer token, calendar_id, data (country, year) |
+| Actionn          | Request                                          | Method   | Requirements                                    |
+| :--------------- | :----------------------------------------------- | :------- | :---------------------------------------------- |
+| Get my calendars | `/api/calendars/my/{type}`                       | `GET`    | Bearer token, type                              |
+| Create calendar  | `/api/calendars/my`                              | `POST`   | Bearer token, data (optional)                   |
+| Get calendar     | `/api/calendars/{calendar_id}`                   | `GET`    | Bearer token, calendar_id                       |
+| Update calendar  | `/api/calendars/{calendar_id}`                   | `PATCH`  | Bearer token, calendar_id, data                 |
+| Delete calendar  | `/api/calendars/{calendar_id}`                   | `DELETE` | Bearer token, calendar_id                       |
+| Share calendar   | `/api/calendars/{calendar_id}/share`             | `POST`   | Bearer token, calendar_id, users (json string)  |
+| Hide calendar    | `/api/calendars/{calendar_id}/hide`              | `POST`   | Bearer token, calendar_id                       |
+| Get events       | `/api/calendars/{calendar_id}/events`            | `GET`    | Bearer token, calendar_id                       |
+| Create event     | `/api/calendars/{calendar_id}/events`            | `POST`   | Bearer token, calendar_id, data (optional)      |
+| Update event     | `/api/calendars/{calendar_id}/events/{event_id}` | `PATCH`  | Bearer token, calendar_id, data                 |
+| Delete event     | `/api/calendars/{calendar_id}/events/{event_id}` | `DELETE` | Bearer token, calendar_id                       |
+| Add holidays     | `/api/calendars/{calendar_id}/holidays`          | `POST`   | Bearer token, calendar_id, data (country, year) |
 
 ## :fox_face: Have a great day!
 **Don't forget to check out [Weevely with Next.js](https://github.com/PAXANDDOS/weevely-next)**  
